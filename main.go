@@ -16,9 +16,9 @@ func main() {
 		Msg("build configuration")
 
 	if !Exists(bc.posts) {
-		log.Fatal().Msg("source directory does not exist")
+		log.Fatal().Str("path", bc.posts).Msg("source directory does not exist")
 	}
 
 	log.Info().Msg("starting build")
-	ConvertToHTML(bc.posts)
+	InitConvert(bc)
 }

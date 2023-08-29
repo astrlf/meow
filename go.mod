@@ -2,7 +2,10 @@ module github.com/astrlf/meow
 
 go 1.21.0
 
-require github.com/rs/zerolog v1.30.0
+require (
+	github.com/gomarkdown/markdown v0.0.0-20230716120725-531d2d74bc12
+	github.com/rs/zerolog v1.30.0
+)
 
 require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
