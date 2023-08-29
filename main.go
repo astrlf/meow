@@ -10,14 +10,15 @@ func main() {
 
 	log.Info().Msg("starting build")
 	log.Info().
+		Str("posts", bc.posts).
 		Str("dist", bc.dist).
-		Str("src", bc.src).
 		Str("css", bc.css).
 		Str("js", bc.js).
 		Msg("build configuration")
 
-	EnsureDir(bc.dist)
-	if !Exists(bc.src) {
-		log.Fatal().Msg("failed to create dist directory")
+	if !Exists(bc.posts) {
+		log.Fatal().Msg("source directory does not exist")
 	}
+
+	ConvertToHTML(bc.posts)
 }
