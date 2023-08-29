@@ -12,7 +12,6 @@ func main() {
 		Str("posts", bc.posts).
 		Str("dist", bc.dist).
 		Str("css", bc.css).
-		Str("js", bc.js).
 		Msg("build configuration")
 
 	if !Exists(bc.posts) {
