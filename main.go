@@ -8,7 +8,6 @@ func main() {
 	InitLogger()
 	bc := InitFlagParser()
 
-	log.Info().Msg("starting build")
 	log.Info().
 		Str("posts", bc.posts).
 		Str("dist", bc.dist).
@@ -20,5 +19,6 @@ func main() {
 		log.Fatal().Msg("source directory does not exist")
 	}
 
+	log.Info().Msg("starting build")
 	ConvertToHTML(bc.posts)
 }
