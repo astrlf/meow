@@ -12,10 +12,13 @@ func main() {
 		Str("posts", bc.posts).
 		Str("dist", bc.dist).
 		Str("css", bc.css).
+		Str("title", bc.title).
 		Msg("build configuration")
 
 	if !Exists(bc.posts) {
-		log.Fatal().Str("path", bc.posts).Msg("source directory does not exist")
+		log.Fatal().
+			Str("path", bc.posts).
+			Msg("source directory does not exist")
 	}
 
 	log.Info().Msg("starting build")
