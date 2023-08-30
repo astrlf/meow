@@ -19,6 +19,7 @@ const htmlTemplate = `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>{{ .Title }}</title>
 <link rel="stylesheet" href="{{ .CSS }}">
+<link rel="icon" href="favicon.ico">
 </head>
 
 <body>
@@ -34,7 +35,7 @@ type TemplateVariables struct {
 	Content string
 }
 
-func ConvertedToTemplated(config BuildConfig, html []byte) []byte {
+func TemplateFile(config BuildConfig, html []byte) []byte {
 	var templated bytes.Buffer
 
 	tmpl := template.Must(template.New("html").Parse(htmlTemplate))
@@ -69,13 +70,28 @@ func EnsureCSS(config *BuildConfig) {
 		Msg("copied css file")
 }
 
-func ConvertToHTML(md []byte) []byte {
+func EnsureMain(config *BuildConfig) {
+	// src/main.md -> dist/index.html
+	main := filepath.Join(config.posts, "main.md")
+	if _, err := os.Stat(main); os.IsNotExist(err) {
+		log.Fatal().Err(err).Msg("main.md does not exist")
+	}
+
+	md, err := os.ReadFile(main)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to read main.md")
+	}
+
+	os.WriteFile(filepath.Join(config.dist, "index.html"), ConvertToHTML(*config, md), 0644)
+}
+
+func ConvertToHTML(config BuildConfig, md []byte) []byte {
 	document := parser.
 		NewWithExtensions(parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock).
 		Parse(md)
 	renderer := html.NewRenderer(html.RendererOptions{Flags: html.CommonFlags | html.HrefTargetBlank})
 
-	return markdown.Render(document, renderer)
+	return TemplateFile(config, markdown.Render(document, renderer))
 }
 
 func InitConvert(config BuildConfig) {
@@ -85,9 +101,16 @@ func InitConvert(config BuildConfig) {
 	}
 
 	EnsureDir(config.dist)
+	EnsureDir(filepath.Join(config.dist, "posts"))
+
+	EnsureMain(&config)
 	EnsureCSS(&config)
 
 	for _, file := range files {
+		if filepath.Base(file) == "main.md" {
+			continue
+		}
+
 		log.Info().Str("file", file).Msg("converting file")
 
 		md, err := os.ReadFile(file)
@@ -95,13 +118,10 @@ func InitConvert(config BuildConfig) {
 			log.Fatal().Err(err).Str("file", file).Msg("failed to read file")
 		}
 
-		html := ConvertToHTML(md)
-		html = ConvertedToTemplated(config, html)
-
-		htmlFile := filepath.Join(config.dist, filepath.Base(file))
+		htmlFile := filepath.Join(config.dist, "posts", filepath.Base(file))
 		htmlFile = htmlFile[:len(htmlFile)-len(filepath.Ext(htmlFile))] + ".html"
 
-		if err := os.WriteFile(htmlFile, html, 0644); err != nil {
+		if err := os.WriteFile(htmlFile, ConvertToHTML(config, md), 0644); err != nil {
 			log.Fatal().Err(err).Str("file", htmlFile).Msg("failed to write file")
 		}
 	}
