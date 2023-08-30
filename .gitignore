@@ -1,2 +1,13 @@
+# useful stuff to avoid while testing
+style.css
 dist
 posts
+
+# builds and releases
+*-windows
+*-darwin
+*-linux
+
+*-windows.zip
+*-darwin.tar.gz
+*-linux.tar.gz
