@@ -55,12 +55,12 @@ func TemplateFile(config BuildConfig, html []byte) []byte {
 func EnsureCSS(config *BuildConfig) {
 	content, err := os.ReadFile(config.css)
 	if err != nil {
+		// sane default
+		config.css = "https://unpkg.com/sakura.css/css/sakura.css"
 		log.Warn().
 			Str("path", config.css).
 			Msg("could not read css file, defaulting to sakura.css")
 
-		// sane default
-		config.css = "https://unpkg.com/sakura.css/css/sakura.css"
 		return
 	}
 
@@ -70,7 +70,7 @@ func EnsureCSS(config *BuildConfig) {
 		Msg("copied css file")
 }
 
-func EnsureMain(config *BuildConfig) {
+func EnsureMain(config BuildConfig) {
 	// src/main.md -> dist/index.html
 	main := filepath.Join(config.posts, "main.md")
 	if _, err := os.Stat(main); os.IsNotExist(err) {
@@ -82,7 +82,7 @@ func EnsureMain(config *BuildConfig) {
 		log.Fatal().Err(err).Msg("failed to read main.md")
 	}
 
-	os.WriteFile(filepath.Join(config.dist, "index.html"), ConvertToHTML(*config, md), 0644)
+	os.WriteFile(filepath.Join(config.dist, "index.html"), ConvertToHTML(config, md), 0644)
 }
 
 func ConvertToHTML(config BuildConfig, md []byte) []byte {
@@ -103,8 +103,8 @@ func InitConvert(config BuildConfig) {
 	EnsureDir(config.dist)
 	EnsureDir(filepath.Join(config.dist, "posts"))
 
-	EnsureMain(&config)
 	EnsureCSS(&config)
+	EnsureMain(config)
 
 	for _, file := range files {
 		if filepath.Base(file) == "main.md" {
