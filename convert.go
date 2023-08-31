@@ -70,6 +70,10 @@ func EnsureCSS(config *BuildConfig) {
 		Msg("copied css file")
 }
 
+func EnsureFavicon(config BuildConfig) {
+	return // TODO
+}
+
 func EnsureMain(config BuildConfig) {
 	// src/main.md -> dist/index.html
 	main := filepath.Join(config.posts, "main.md")
@@ -118,8 +122,10 @@ func InitConvert(config BuildConfig) {
 			log.Fatal().Err(err).Str("file", file).Msg("failed to read file")
 		}
 
+		config.title = NormaliseTitle(RemoveExtension(filepath.Base(file)))
+
 		htmlFile := filepath.Join(config.dist, "posts", filepath.Base(file))
-		htmlFile = htmlFile[:len(htmlFile)-len(filepath.Ext(htmlFile))] + ".html"
+		htmlFile = RemoveExtension(htmlFile) + ".html"
 
 		if err := os.WriteFile(htmlFile, ConvertToHTML(config, md), 0644); err != nil {
 			log.Fatal().Err(err).Str("file", htmlFile).Msg("failed to write file")
