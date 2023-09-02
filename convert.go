@@ -71,11 +71,27 @@ func EnsureCSS(config *BuildConfig) {
 }
 
 func EnsureFavicon(config BuildConfig) {
+	favicon := "favicon.ico"
+	content, err := os.ReadFile(favicon)
+	if err != nil {
+		log.Warn().
+			Str("path", favicon).
+			Msg("could not read favicon file, defaulting to none")
+
+		return
+	}
+
+	os.WriteFile(filepath.Join(config.dist, "favicon.ico"), content, 0644)
+	log.Info().
+		Str("path", favicon).
+		Msg("copied favicon")
+}
+
+func EnsureTOC(config BuildConfig) {
 	return // TODO
 }
 
 func EnsureMain(config BuildConfig) {
-	// src/main.md -> dist/index.html
 	main := filepath.Join(config.posts, "main.md")
 	if _, err := os.Stat(main); os.IsNotExist(err) {
 		log.Fatal().Err(err).Msg("main.md does not exist")
@@ -109,6 +125,7 @@ func InitConvert(config BuildConfig) {
 
 	EnsureCSS(&config)
 	EnsureMain(config)
+	EnsureFavicon(config)
 
 	for _, file := range files {
 		if filepath.Base(file) == "main.md" {
